@@ -1,0 +1,48 @@
+//支持java语言
+apply plugin: 'java-library'
+//groovy语言
+//apply plugin: 'groovy'
+//kotlin语言
+//apply plugin: 'kotlin'
+
+//使用maven
+apply plugin: 'maven'
+
+//先上传到github，再https://jitpack.io/
+//apply plugin: 'com.github.dcendents.android-maven'
+
+
+apply from: "../config.gradle"
+
+dependencies {
+    // gradle sdk
+    implementation gradleApi()
+    // groovy sdk
+    implementation localGroovy()
+    implementation "com.android.tools.build:gradle:$build_gradle_version"
+
+    implementation "com.google.code.gson:gson:${dependenceVersion.GsonVersion}"
+    implementation "com.squareup.okhttp3:okhttp:${dependenceVersion.okhttpVersion}"
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+//            snapshotRepository(url: 'https://packages.aliyun.com/maven/repository/2279732-snapshot-MO4QrY/'){
+//                authentication(userName: '632887f00bdb33a273e5db38', password: 'i6A0aEtjbOm4')
+//            }
+            repository(url: 'https://packages.aliyun.com/maven/repository/2279732-release-jK8eQ1/'){
+                authentication(userName: '632887f00bdb33a273e5db38', password: 'i6A0aEtjbOm4')
+            }
+            pom.groupId = "cn.daily.android"
+            pom.artifactId = "uploadApk-plugin"
+            pom.version = "0.0.1"
+            pom.packaging = "aar"
+        }
+    }
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
