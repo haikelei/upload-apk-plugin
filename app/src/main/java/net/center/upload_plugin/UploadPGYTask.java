@@ -34,7 +34,7 @@ import okhttp3.Response;
  * Created by Android-ZX
  * 2021/9/3.
  */
-public class UploadTask extends DefaultTask {
+public class UploadPGYTask extends DefaultTask {
 
     private BaseVariant mVariant;
     private Project mTargetProject;
@@ -82,75 +82,6 @@ public class UploadTask extends DefaultTask {
                     , params.buildPassword, params.buildUpdateDescription
                     , params.buildInstallDate, params.buildChannelShortcut, apk);
 //            CmdHelper.getGitLogByTimeAndCount(-1, -1);
-        }
-    }
-
-    /**
-     * 本接口上传速度很慢，即将废弃，强烈建议您使用 快速上传App 中的方式来替代。
-     * https://www.pgyer.com/doc/view/api#fastUploadApp
-     *
-     * @param apiKey
-     * @param appName
-     * @param installType
-     * @param buildPassword
-     * @param buildUpdateDescription
-     * @param buildInstallDate
-     * @param buildChannelShortcut
-     * @param apkFile
-     */
-    private void uploadPgyAndSendMessage(String apiKey, String appName, int installType, String buildPassword, String buildUpdateDescription, int buildInstallDate, String buildChannelShortcut, File apkFile) {
-        //builder
-        MultipartBody.Builder bodyBuilder = new MultipartBody.Builder().setType(MultipartBody.FORM);
-        bodyBuilder.addFormDataPart("_api_key", apiKey);
-        if (!PluginUtils.isEmpty(buildUpdateDescription)) {
-            bodyBuilder.addFormDataPart("buildUpdateDescription", buildUpdateDescription);
-        }
-        if (installType != 1) {
-            bodyBuilder.addFormDataPart("buildInstallType", installType + "");
-        }
-        if (installType == 2 && !PluginUtils.isEmpty(buildPassword)) {
-            bodyBuilder.addFormDataPart("buildPassword", buildPassword);
-        }
-        bodyBuilder.addFormDataPart("buildInstallDate", buildInstallDate + "");
-        if (!PluginUtils.isEmpty(buildChannelShortcut)) {
-            bodyBuilder.addFormDataPart("buildChannelShortcut", buildChannelShortcut);
-        }
-        //add file
-        bodyBuilder.addFormDataPart("file", apkFile.getName(), RequestBody
-                .create(MediaType.parse("*/*"), apkFile));
-        //request
-        Request request = getRequestBuilder()
-                .url("https://www.pgyer.com/apiv2/app/upload")
-                .post(bodyBuilder.build())
-                .build();
-        try {
-            Response response = HttpHelper.getOkHttpClient().newCall(request).execute();
-            if (response.isSuccessful() && response.body() != null) {
-                String result = response.body().string();
-                System.out.println("upload pgy result: " + result);
-                if (!PluginUtils.isEmpty(result)) {
-                    PgyUploadResult uploadResult = new Gson().fromJson(result, PgyUploadResult.class);
-                    if (uploadResult.getCode() != 0) {
-                        System.out.println("upload pgy result error msg: " + uploadResult.getMessage());
-                        return;
-                    }
-                    if (uploadResult.getData() != null) {
-                        String url = "https://www.pgyer.com/" + uploadResult.getData().getBuildShortcutUrl();
-                        System.out.println("上传成功，应用链接: " + url);
-                        String gitLog = CmdHelper.checkGetGitParamsWithLog(mTargetProject);
-                        SendMsgHelper.sendMsgToDingDing(mTargetProject, uploadResult.getData(), gitLog);
-                        SendMsgHelper.sendMsgToFeishu(mTargetProject, uploadResult.getData(), gitLog);
-                        SendMsgHelper.sendMsgToWeiXinGroup(mTargetProject, uploadResult.getData(), gitLog);
-                    } else {
-                        System.out.println("upload pgy result error : data is empty");
-                    }
-                }
-            } else {
-                System.out.println("upload pgy failure");
-            }
-            System.out.println("******************* upload finish *******************");
-        } catch (Exception e) {
-            System.out.println("upload pgy failure " + e);
         }
     }
 

@@ -23,20 +23,22 @@ dependencies {
 
     implementation "com.google.code.gson:gson:${dependenceVersion.GsonVersion}"
     implementation "com.squareup.okhttp3:okhttp:${dependenceVersion.okhttpVersion}"
+    implementation "net.dongliu:apk-parser:2.6.10"
+    implementation "junit:junit:4.12"
 }
 
 uploadArchives {
     repositories {
         mavenDeployer {
-//            snapshotRepository(url: 'https://packages.aliyun.com/maven/repository/2279732-snapshot-MO4QrY/'){
-//                authentication(userName: '632887f00bdb33a273e5db38', password: 'i6A0aEtjbOm4')
-//            }
-            repository(url: 'https://packages.aliyun.com/maven/repository/2279732-release-jK8eQ1/'){
+            snapshotRepository(url: 'https://packages.aliyun.com/maven/repository/2279732-snapshot-MO4QrY/'){
                 authentication(userName: '632887f00bdb33a273e5db38', password: 'i6A0aEtjbOm4')
             }
+//            repository(url: 'https://packages.aliyun.com/maven/repository/2279732-release-jK8eQ1/'){
+//                authentication(userName: '632887f00bdb33a273e5db38', password: 'i6A0aEtjbOm4')
+//            }
             pom.groupId = "cn.daily.android"
             pom.artifactId = "uploadApk-plugin"
-            pom.version = "0.0.1"
+            pom.version = "0.0.4-SNAPSHOT"
             pom.packaging = "aar"
         }
     }

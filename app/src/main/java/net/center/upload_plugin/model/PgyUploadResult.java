@@ -2,6 +2,8 @@ package net.center.upload_plugin.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import net.center.upload_plugin.interfaces.SendMsgInterface;
+
 /**
  * Created by center
  * 2021-09-03.
@@ -39,7 +41,7 @@ public class PgyUploadResult extends BasePgyResult {
         this.data = data;
     }
 
-    public static class DataDTO {
+    public static class DataDTO implements SendMsgInterface {
         @SerializedName("buildKey")
         private String buildKey;
         @SerializedName("buildType")

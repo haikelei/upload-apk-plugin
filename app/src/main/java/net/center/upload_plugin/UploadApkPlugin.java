@@ -3,12 +3,14 @@ package net.center.upload_plugin;
 import com.android.build.gradle.AppExtension;
 import com.android.build.gradle.api.ApplicationVariant;
 
+import net.center.upload_plugin.model.fir.UploadFirParams;
 import net.center.upload_plugin.model.UploadPgyParams;
 import net.center.upload_plugin.params.GitLogParams;
 import net.center.upload_plugin.params.SendDingParams;
 import net.center.upload_plugin.params.SendFeishuParams;
 import net.center.upload_plugin.params.SendWeixinGroupParams;
 
+import org.apache.http.util.TextUtils;
 import org.gradle.api.DomainObjectSet;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -21,7 +23,9 @@ public class UploadApkPlugin implements Plugin<Project> {
 
     @Override
     public void apply(Project project) {
-        UploadPgyParams uploadParams = project.getExtensions().create(PluginConstants.UPLOAD_PARAMS_NAME, UploadPgyParams.class);
+        UploadPgyParams uploadParams = project.getExtensions().create(PluginConstants.UPLOAD_PGY_PARAMS_NAME, UploadPgyParams.class);
+        UploadFirParams uploadFirParams = project.getExtensions().create(PluginConstants.UPLOAD_FIR_PARAMS_NAME, UploadFirParams.class);
+
         createParams(project);
         project.afterEvaluate(project1 -> {
             AppExtension appExtension = ((AppExtension) project1.getExtensions().findByName(PluginConstants.ANDROID_EXTENSION_NAME));
@@ -31,7 +35,12 @@ public class UploadApkPlugin implements Plugin<Project> {
             DomainObjectSet<ApplicationVariant> appVariants = appExtension.getApplicationVariants();
             for (ApplicationVariant applicationVariant : appVariants) {
                 if (applicationVariant.getBuildType() != null) {
-                    dependsOnTask(applicationVariant, uploadParams, project1);
+                    if (!TextUtils.isEmpty(uploadParams.apiKey)) {
+                        dependsOnTask(applicationVariant, uploadParams, project1);
+                    } else if (!TextUtils.isEmpty(uploadFirParams.apiToken)) {
+                        dependsOnTask(applicationVariant, uploadFirParams, project1);
+                    }
+
                 }
             }
         });
@@ -52,12 +61,26 @@ public class UploadApkPlugin implements Plugin<Project> {
             variantName = PluginUtils.isEmpty(uploadParams.buildTypeName) ? "Release" : uploadParams.buildTypeName;
         }
         //创建我们，上传到蒲公英的task任务
-        UploadTask uploadTask = project1.getTasks()
-                .create(PluginConstants.TASK_EXTENSION_NAME + variantName, UploadTask.class);
-        uploadTask.init(applicationVariant, project1);
+        UploadPGYTask uploadPGYTask = project1.getTasks()
+                .create(PluginConstants.TASK_EXTENSION_NAME + variantName, UploadPGYTask.class);
+        uploadPGYTask.init(applicationVariant, project1);
 
         //依赖关系 。上传依赖打包，打包依赖clean。
         applicationVariant.getAssembleProvider().get().dependsOn(project1.getTasks().findByName("clean"));
-        uploadTask.dependsOn(applicationVariant.getAssembleProvider().get());
+        uploadPGYTask.dependsOn(applicationVariant.getAssembleProvider().get());
+    }
+
+
+    private void dependsOnTask(ApplicationVariant applicationVariant, UploadFirParams uploadFirParams, Project project1) {
+        String variantName =
+                applicationVariant.getName().substring(0, 1).toUpperCase() + applicationVariant.getName().substring(1);
+        //创建我们，上传到蒲公英的task任务
+        UploadFIRTask uploadFIRTask = project1.getTasks()
+                .create(PluginConstants.TASK_EXTENSION_NAME + variantName, UploadFIRTask.class);
+        uploadFIRTask.init(applicationVariant, project1);
+
+        //依赖关系 。上传依赖打包，打包依赖clean。
+        applicationVariant.getAssembleProvider().get().dependsOn(project1.getTasks().findByName("clean"));
+        uploadFIRTask.dependsOn(applicationVariant.getAssembleProvider().get());
     }
 }

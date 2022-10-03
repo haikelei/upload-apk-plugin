@@ -1,6 +1,7 @@
 package net.center.upload_plugin.helper;
 
 import net.center.upload_plugin.PluginUtils;
+import net.center.upload_plugin.interfaces.SendMsgInterface;
 import net.center.upload_plugin.model.DingDingRequestBean;
 import net.center.upload_plugin.model.PgyUploadResult;
 import net.center.upload_plugin.model.WXGroupRequestBean;
@@ -35,7 +36,7 @@ public class SendMsgHelper {
      * @param project
      * @param dataDTO
      */
-    public static void sendMsgToDingDing(Project project, PgyUploadResult.DataDTO dataDTO, String gitLog) {
+    public static void sendMsgToDingDing(Project project, SendMsgInterface dataDTO, String gitLog) {
         SendDingParams dingParams = SendDingParams.getDingParamsConfig(project);
         if (PluginUtils.isEmpty(dingParams.accessToken)) {
             System.out.println("send to Dingding failure：accessToken is empty");
@@ -135,7 +136,7 @@ public class SendMsgHelper {
      * @param project
      * @param dataDTO
      */
-    public static void sendMsgToFeishu(Project project, PgyUploadResult.DataDTO dataDTO, String gitLog) {
+    public static void sendMsgToFeishu(Project project, SendMsgInterface dataDTO, String gitLog) {
         SendFeishuParams feishuParams = SendFeishuParams.getFeishuParamsConfig(project);
         String webHookHostUrl = feishuParams.webHookHostUrl;
         if (PluginUtils.isEmpty(webHookHostUrl)) {
@@ -302,7 +303,7 @@ public class SendMsgHelper {
      * @param project
      * @param dataDTO
      */
-    public static void sendMsgToWeiXinGroup(Project project, PgyUploadResult.DataDTO dataDTO, String gitLog) {
+    public static void sendMsgToWeiXinGroup(Project project, SendMsgInterface dataDTO, String gitLog) {
         SendWeixinGroupParams weixinGroupParams = SendWeixinGroupParams.getWeixinGroupConfig(project);
         String webHookUrl = weixinGroupParams.webHookUrl;
         if (PluginUtils.isEmpty(webHookUrl)) {
