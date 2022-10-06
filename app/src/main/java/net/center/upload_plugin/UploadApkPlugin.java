@@ -23,7 +23,7 @@ public class UploadApkPlugin implements Plugin<Project> {
 
     @Override
     public void apply(Project project) {
-        UploadPgyParams uploadParams = project.getExtensions().create(PluginConstants.UPLOAD_PGY_PARAMS_NAME, UploadPgyParams.class);
+        UploadPgyParams uploadPGYParams = project.getExtensions().create(PluginConstants.UPLOAD_PGY_PARAMS_NAME, UploadPgyParams.class);
         UploadFirParams uploadFirParams = project.getExtensions().create(PluginConstants.UPLOAD_FIR_PARAMS_NAME, UploadFirParams.class);
 
         createParams(project);
@@ -35,8 +35,8 @@ public class UploadApkPlugin implements Plugin<Project> {
             DomainObjectSet<ApplicationVariant> appVariants = appExtension.getApplicationVariants();
             for (ApplicationVariant applicationVariant : appVariants) {
                 if (applicationVariant.getBuildType() != null) {
-                    if (!TextUtils.isEmpty(uploadParams.apiKey)) {
-                        dependsOnTask(applicationVariant, uploadParams, project1);
+                    if (!TextUtils.isEmpty(uploadPGYParams.apiKey)) {
+                        dependsOnTask(applicationVariant, uploadPGYParams, project1);
                     } else if (!TextUtils.isEmpty(uploadFirParams.apiToken)) {
                         dependsOnTask(applicationVariant, uploadFirParams, project1);
                     }

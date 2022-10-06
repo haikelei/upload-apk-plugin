@@ -3,19 +3,16 @@ package net.center.upload_plugin;
 
 import com.android.build.gradle.api.BaseVariant;
 import com.android.build.gradle.api.BaseVariantOutput;
-import com.android.tools.r8.graph.S;
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
 import net.center.upload_plugin.helper.CmdHelper;
 import net.center.upload_plugin.helper.HttpHelper;
 import net.center.upload_plugin.helper.SendMsgHelper;
-import net.center.upload_plugin.model.PgyUploadResult;
-import net.center.upload_plugin.model.fir.CertType;
-import net.center.upload_plugin.model.fir.FIRAppListInfo;
-import net.center.upload_plugin.model.fir.FIRAuthResponse;
-import net.center.upload_plugin.model.fir.FIRUploadResponse;
-import net.center.upload_plugin.model.fir.UploadFirParams;
+import net.center.upload_plugin.model.fir.*;
 import net.center.upload_plugin.net.OkHttpUtils;
 import net.dongliu.apk.parser.ApkFile;
 import net.dongliu.apk.parser.bean.ApkMeta;
@@ -25,18 +22,12 @@ import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskAction;
-import org.json.JSONObject;
-import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
-import okhttp3.FormBody;
-import okhttp3.HttpUrl;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.Request;
@@ -97,27 +88,6 @@ public class UploadFIRTask extends DefaultTask {
 
         }
     }
-    
-    public void testMain() {
-        try {
-            File file = new File("/Users/gary/Downloads/11/app-integration.apk");
-            if (file.exists() && file.isFile()) {
-                ApkFile apkFile = new ApkFile(file);
-                ApkMeta apkMeta = apkFile.getApkMeta();
-                System.out.println("apkInfo :" + apkMeta.toString());
-                //注释：apk所有信息都在apkMeta类里面。可以输出整个apkMeta来查看跟多详情信息
-
-
-                UploadFirParams params = new UploadFirParams();
-                params.apiToken = "f8a5d98213caaa5ba1179f7e76e5980b";
-                uploadFIR(params,apkMeta,file);
-
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
 
     private void uploadFIR(UploadFirParams params, ApkMeta apkMeta, File apk) {
         String result = OkHttpUtils.builder().url("http://api.bq04.com/apps")
@@ -154,14 +124,15 @@ public class UploadFIRTask extends DefaultTask {
             Response response = HttpHelper.getOkHttpClient().newCall(request).execute();
             if (response.isSuccessful() && response.body() != null) {
                 String result = response.body().string();
+                response.body().close();
                 System.out.println("upload fir --- 上传应用结果: " + result);
                 if (!PluginUtils.isEmpty(result)) {
                     FIRUploadResponse firUploadResponse = new Gson().fromJson(result, FIRUploadResponse.class);
                     if (!firUploadResponse.is_completed) {
-                        checkFIRUploadBuildInfo(params,apkMeta);
                         System.out.println("upload fir --- 上传应用失败: ");
                         return;
                     }
+                    checkFIRUploadBuildInfo(params,apkMeta);
                     System.out.println("upload fir --- 上传应用成功: ");
                 }
             } else {
@@ -178,7 +149,9 @@ public class UploadFIRTask extends DefaultTask {
         String res = OkHttpUtils.builder().url("http://api.bq04.com/apps?api_token=" + uploadFirParams.apiToken)
                 .get()
                 .sync();
-        List<FIRAppListInfo> appListInfoList = new Gson().fromJson(res, new TypeToken<List<FIRAppListInfo>>(){}.getType());
+        System.out.println("upload fir --- 获取全部应用列表:"+ res);
+        FirAppListResponse firAppListResponse = new Gson().fromJson(res, FirAppListResponse.class);
+        List<FIRAppListInfo> appListInfoList = firAppListResponse.items;
         //2.根据上传应用包名查找
         FIRAppListInfo firAppListInfo = null;
         for (int i = 0; i < appListInfoList.size(); i++) {

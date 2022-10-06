@@ -12,8 +12,11 @@ import net.center.upload_plugin.params.SendDingParams;
 import net.center.upload_plugin.params.SendFeishuParams;
 import net.center.upload_plugin.params.SendWeixinGroupParams;
 
+import org.apache.http.util.TextUtils;
 import org.gradle.api.Project;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,7 +65,7 @@ public class SendMsgHelper {
             if (PluginUtils.isEmpty(clickTxt)) {
                 clickTxt = defaultClickText;
             }
-            contentStr.append("[").append(clickTxt).append("](https://www.pgyer.com/").append(dataDTO.getBuildShortcutUrl()).append(")\n");
+            contentStr.append("[").append(clickTxt).append("](").append(dataDTO.getBuildShortcutUrl()).append(")\n");
             contentStr.append("![二维码](").append(dataDTO.getBuildQRCodeURL()).append(")\n");
             if (!PluginUtils.isEmpty(gitLog) && dingParams.isSupportGitLog) {
                 contentStr.append("### ").append(defaultLogTitle).append(gitLog);
@@ -78,7 +81,9 @@ public class SendMsgHelper {
             actionCardBean.setTitle(titleStr.toString());
             StringBuilder contentStr = new StringBuilder("**").append(titleStr).append("** \n ").append(text).append(" ");
             contentStr.append("*").append(dataDTO.getBuildCreated()).append("*").append("\n");
-            contentStr.append("![二维码](").append(dataDTO.getBuildQRCodeURL()).append(")\n");
+            if (!TextUtils.isEmpty(dataDTO.getBuildQRCodeURL())) {
+                contentStr.append("![二维码](").append(dataDTO.getBuildQRCodeURL()).append(")\n");
+            }
             if (!PluginUtils.isEmpty(gitLog) && dingParams.isSupportGitLog) {
                 contentStr.append("### ").append(defaultLogTitle).append(gitLog);
             }
@@ -90,7 +95,19 @@ public class SendMsgHelper {
                 clickTxt = defaultClickText;
             }
             actionCardBean.setSingleTitle(clickTxt);
-            actionCardBean.setSingleURL("https://www.pgyer.com/" + dataDTO.getBuildShortcutUrl());
+            if (dingParams.pcSlide) {
+                actionCardBean.setSingleURL(dataDTO.getBuildShortcutUrl());
+            }else {
+                try {
+                    String url = URLEncoder.encode(dataDTO.getBuildShortcutUrl(),"utf-8");
+                    actionCardBean.setSingleURL("dingtalk://dingtalkclient/page/link?url="+url+"&pc_slide=false");
+                } catch (UnsupportedEncodingException e) {
+                    actionCardBean.setSingleURL(dataDTO.getBuildShortcutUrl());
+                    throw new RuntimeException(e);
+                }
+
+            }
+
             requestBean.setActionCard(actionCardBean);
         } else {
             requestBean.setMsgtype("link");
@@ -102,7 +119,7 @@ public class SendMsgHelper {
             linkBean.setText(contentStr.toString());
             linkBean.setTitle(titleStr.toString());
             linkBean.setPicUrl(dataDTO.getBuildQRCodeURL());
-            linkBean.setMessageUrl("https://www.pgyer.com/" + dataDTO.getBuildShortcutUrl());
+            linkBean.setMessageUrl(dataDTO.getBuildShortcutUrl());
             requestBean.setLink(linkBean);
         }
 
@@ -175,7 +192,7 @@ public class SendMsgHelper {
             TextDTO elements1TextBean = new TextDTO();
             elements1TextBean.setTag("lark_md");
             textStr.append("[").append(PluginUtils.isEmpty(feishuParams.clickTxt) ? defaultClickText : feishuParams.clickTxt)
-                    .append("]").append("(https://www.pgyer.com/").append(dataDTO.getBuildShortcutUrl()).append(")").append("   ");
+                    .append("]").append(dataDTO.getBuildShortcutUrl()).append(")").append("   ");
             textStr.append("[查看下载二维码]").append("(").append(dataDTO.getBuildQRCodeURL()).append(")");
             if (feishuParams.isAtAll) {
                 textStr.append(" \n").append("<at id=all></at>");
@@ -205,7 +222,7 @@ public class SendMsgHelper {
             ElementsDTO actionBtnDownBtn = new ElementsDTO();
             actionBtnDownBtn.setTag("button");
             actionBtnDownBtn.setType("primary");
-            actionBtnDownBtn.setUrl("https://www.pgyer.com/" + dataDTO.getBuildShortcutUrl());
+            actionBtnDownBtn.setUrl(dataDTO.getBuildShortcutUrl());
             TextDTO actionDownBtnText = new TextDTO();
             actionDownBtnText.setTag("plain_text");
             actionDownBtnText.setContent(PluginUtils.isEmpty(feishuParams.clickTxt) ? defaultClickText : feishuParams.clickTxt);
@@ -237,7 +254,7 @@ public class SendMsgHelper {
             FeiShuRequestBean.ContentDTO.PostDTO.ZhCnDTO.ContentBean contentBeanA = new FeiShuRequestBean.ContentDTO.PostDTO.ZhCnDTO.ContentBean();
             contentBeanA.setTag("a");
             contentBeanA.setText(PluginUtils.isEmpty(feishuParams.clickTxt) ? defaultClickText : feishuParams.clickTxt);
-            contentBeanA.setHref("https://www.pgyer.com/" + dataDTO.getBuildShortcutUrl());
+            contentBeanA.setHref(dataDTO.getBuildShortcutUrl());
             List<FeiShuRequestBean.ContentDTO.PostDTO.ZhCnDTO.ContentBean> contentBeans = new ArrayList<>();
             contentBeans.add(contentBeanText);
             contentBeans.add(contentBeanA);
@@ -322,7 +339,7 @@ public class SendMsgHelper {
         if ("text".equals(weixinGroupParams.msgtype)) {
             wxGroupRequestBean.setMsgtype("text");
             WXGroupRequestBean.TextDTO textDTO = new WXGroupRequestBean.TextDTO();
-            String contentStr = dataDTO.getBuildName() + contentTitle + "\n" + "下载链接：https://www.pgyer.com/" + dataDTO.getBuildShortcutUrl() + " \n" + contentText;
+            String contentStr = dataDTO.getBuildName() + contentTitle + "\n" + "下载链接：" + dataDTO.getBuildShortcutUrl() + " \n" + contentText;
             textDTO.setContent(contentStr);
             if (weixinGroupParams.isAtAll) {
                 List<String> mentionedList = new ArrayList<>();
@@ -345,7 +362,7 @@ public class SendMsgHelper {
                 desStr = contentText;
             }
             articlesDTO.setDescription(desStr);
-            articlesDTO.setUrl("https://www.pgyer.com/" + dataDTO.getBuildShortcutUrl());
+            articlesDTO.setUrl(dataDTO.getBuildShortcutUrl());
             articlesDTO.setPicurl(dataDTO.getBuildQRCodeURL());
             List<WXGroupRequestBean.NewsDTO.ArticlesDTO> articlesDTOList = new ArrayList<>();
             articlesDTOList.add(articlesDTO);
@@ -358,7 +375,7 @@ public class SendMsgHelper {
             markStr.append("**").append(dataDTO.getBuildName()).append("** V").append(dataDTO.getBuildVersion())
                     .append("  ").append(dataDTO.getBuildCreated()).append(" \n")
                     .append(contentTitle).append(" \n").append(contentText).append(" \n")
-                    .append("<font color=\"info\">[下载链接，点击下载](https://www.pgyer.com/")
+                    .append("<font color=\"info\">[下载链接，点击下载](")
                     .append(dataDTO.getBuildShortcutUrl()).append(")</font>");
             if (!PluginUtils.isEmpty(gitLog) && weixinGroupParams.isSupportGitLog) {
                 markStr.append(" \n").append("**").append(defaultLogTitle).append("**").append(gitLog);

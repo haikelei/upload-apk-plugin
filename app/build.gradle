@@ -30,15 +30,15 @@ dependencies {
 uploadArchives {
     repositories {
         mavenDeployer {
-            snapshotRepository(url: 'https://packages.aliyun.com/maven/repository/2279732-snapshot-MO4QrY/'){
-                authentication(userName: '632887f00bdb33a273e5db38', password: 'i6A0aEtjbOm4')
-            }
-//            repository(url: 'https://packages.aliyun.com/maven/repository/2279732-release-jK8eQ1/'){
+//            snapshotRepository(url: 'https://packages.aliyun.com/maven/repository/2279732-snapshot-MO4QrY/'){
 //                authentication(userName: '632887f00bdb33a273e5db38', password: 'i6A0aEtjbOm4')
 //            }
+            repository(url: 'https://packages.aliyun.com/maven/repository/2279732-release-jK8eQ1/'){
+                authentication(userName: '632887f00bdb33a273e5db38', password: 'i6A0aEtjbOm4')
+            }
             pom.groupId = "cn.daily.android"
             pom.artifactId = "uploadApk-plugin"
-            pom.version = "0.0.4-SNAPSHOT"
+            pom.version = "0.0.1.1"
             pom.packaging = "aar"
         }
     }

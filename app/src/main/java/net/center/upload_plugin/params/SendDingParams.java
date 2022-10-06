@@ -20,6 +20,9 @@ public class SendDingParams {
      * 是否支持发送git记录
      */
     public boolean isSupportGitLog = true;
+    //在PC客户端点击消息中的URL链接时，希望控制链接的打开方式
+    //true：表示在PC客户端侧边栏打开 false：表示在浏览器打开
+    public boolean pcSlide = true;
 
     public SendDingParams() {
 
