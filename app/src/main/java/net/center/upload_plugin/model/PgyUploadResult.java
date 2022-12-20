@@ -213,7 +213,7 @@ public class PgyUploadResult extends BasePgyResult {
         }
 
         public String getBuildShortcutUrl() {
-            return "https://www.pgyer.com/" + buildShortcutUrl;
+            return "https://www.pgyer.com/" + buildKey;
         }
 
         public void setBuildShortcutUrl(String buildShortcutUrl) {
