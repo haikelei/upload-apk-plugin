@@ -99,7 +99,8 @@ public class SendMsgHelper {
                 actionCardBean.setSingleURL(dataDTO.getBuildShortcutUrl());
             }else {
                 try {
-                    String url = URLEncoder.encode(dataDTO.getBuildShortcutUrl(),"utf-8");
+//                    String url = URLEncoder.encode(dataDTO.getBuildShortcutUrl(),"utf-8");
+                    String url = URLEncoder.encode("https://www.pgyer.com/" + dataDTO.getBuildKey(),"utf-8");
                     actionCardBean.setSingleURL("dingtalk://dingtalkclient/page/link?url="+url+"&pc_slide=false");
                 } catch (UnsupportedEncodingException e) {
                     actionCardBean.setSingleURL(dataDTO.getBuildShortcutUrl());

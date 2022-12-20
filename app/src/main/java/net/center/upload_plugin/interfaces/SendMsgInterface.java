@@ -13,4 +13,5 @@ public interface SendMsgInterface {
     String getBuildVersion();
 
     String getBuildShortcutUrl();
+    String getBuildKey();
 }

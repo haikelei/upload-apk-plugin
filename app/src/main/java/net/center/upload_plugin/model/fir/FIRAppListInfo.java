@@ -57,6 +57,11 @@ public class FIRAppListInfo implements SendMsgInterface {
         return scheme + path;
     }
 
+    @Override
+    public String getBuildKey() {
+        return "";
+    }
+
 
     public static class MasterReleaseBean {
         public String version;
